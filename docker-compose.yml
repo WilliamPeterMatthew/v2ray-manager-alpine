@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  v2ray-alpine:
+    build: .
+    container_name: v2ray-alpine
+    restart: always
+    ports:
+      - "1080:1080"   # 客户端端口
+      - "8080:8080"   # 服务端端口
+    volumes:
+      - ./config.json:/etc/v2ray/config.json:ro
+    environment:
+      - TZ=Asia/Shanghai
+    
+# networks: # 网络配置，需要使用 IPv6 时取消注释
+#   default:
+#     enable_ipv6: true

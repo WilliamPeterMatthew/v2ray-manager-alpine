@@ -1,0 +1,68 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - v2ray-alpine
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - linux/386
+          - linux/amd64
+          - linux/arm/v7
+          - linux/arm64/v8
+          # - linux/ppc64le
+          # - linux/s390x
+          - linux/riscv64
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v2ray-alpine
+      
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Extract current date
+        id: extract-date
+        run: |
+          DATE=$(date +%Y%m%d)
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+
+      - name: Sanitize arch name
+        id: sanitize
+        run: |
+          safe_arch=$(echo "${{ matrix.arch }}" | tr '/' '-')
+          echo "safe_arch=$safe_arch" >> $GITHUB_OUTPUT
+
+      - name: Build ${{ matrix.arch }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.arch }}
+          push: false
+          tags: |
+            v2ray-test:${{ steps.sanitize.outputs.safe_arch }}-latest-alpine
+            v2ray-test:${{ steps.sanitize.outputs.safe_arch }}-${{ steps.extract-date.outputs.date }}-alpine
+          outputs: type=docker,dest=./v2ray-${{ steps.sanitize.outputs.safe_arch }}-alpine.tar
+
+      - name: Upload ${{ matrix.arch }} image
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2ray-${{ steps.sanitize.outputs.safe_arch }}-alpine
+          path: v2ray-${{ steps.sanitize.outputs.safe_arch }}-alpine.tar
