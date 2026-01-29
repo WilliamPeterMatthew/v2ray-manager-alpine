@@ -24,7 +24,7 @@ RUN set -ex; \
         "linux/386") FILE="v2ray-linux-32.zip" ;; \
         "linux/amd64") FILE="v2ray-linux-64.zip" ;; \
         "linux/arm/v7") FILE="v2ray-linux-arm32-v7a.zip" ;; \
-        "linux/arm64/v8") FILE="v2ray-linux-arm64-v8a.zip" ;; \
+        "linux/arm64"*) FILE="v2ray-linux-arm64-v8a.zip" ;; \
         # "linux/ppc64le") FILE="v2ray-linux-ppc64le.zip" ;; \
         # "linux/s390x") FILE="v2ray-linux-s390x.zip" ;; \
         "linux/riscv64") FILE="v2ray-linux-riscv64.zip" ;; \
